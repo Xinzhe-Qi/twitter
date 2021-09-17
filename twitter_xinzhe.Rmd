@@ -1,0 +1,19 @@
+---
+title: "Twitter Sentiment Analysis"
+author: "Xinzhe Qi"
+output: html_document
+---
+
+```{r}
+# install.packages("rtweet")
+```
+
+```{r}
+library(rtweet)
+library(tidyverse)
+```
+
+```{r}
+
+```
+

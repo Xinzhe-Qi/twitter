@@ -1,19 +1,75 @@
 ---
 title: "Twitter Sentiment Analysis"
 author: "Xinzhe Qi"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
 ---
 
+# Word Cloud
+## Packages and Data
 ```{r}
-# install.packages("rtweet")
-```
-
-```{r}
-library(rtweet)
 library(tidyverse)
+library(tm)
 ```
 
 ```{r}
-
+tw = read_csv("Apple-Twitter-Sentiment-DFE.csv")
+glimpse(tw)
 ```
+
+## Vectorize the corpus
+```{r}
+corpus <- iconv(tw$text, to = "utf-8-mac")
+corpus <- Corpus(VectorSource(corpus))
+inspect(corpus[1:5])
+```
+
+## Clean the corpus
+```{r warning=F}
+corpus_clean <- tm_map(corpus, tolower) %>% 
+  tm_map(., removeNumbers) %>% 
+  tm_map(., removePunctuation) %>% 
+  tm_map(., stripWhitespace) %>% 
+  tm_map(., removeWords, stopwords('english')) %>% 
+  tm_map(., removeWords, c('aapl', 'apple')) %>% 
+  tm_map(., gsub, pattern = 'stocks', replacement = 'stock')
+inspect(corpus_clean[1:5])
+```
+
+```{r warning=F}
+removeURL_fct <- function(x) gsub('http[[:alnum:]]*', '', x)
+corpus_clean <- tm_map(corpus_clean, content_transformer(removeURL_fct))
+inspect(corpus_clean[1:5])
+```
+
+## Term document matrix
+```{r}
+tdm <- TermDocumentMatrix(corpus_clean)
+tdm <- as.matrix(tdm)
+tdm[1:10, 1:10]
+```
+
+```{r warning=F}
+library(wordcloud2)
+word_freq <- sort(rowSums(tdm), decreasing = TRUE)
+word_freq2 = data.frame(names(word_freq), word_freq)
+colnames(word_freq2) <- c("word", "freq")
+wordcloud2(word_freq2, size = 0.6, rotateRatio = 0.5)
+```
+
+# Sentiment Analysis
+
+```{r}
+head(word_freq2)
+```
+
+
+```{r}
+library(tidytext)
+sentiment_output <- word_freq2 %>% 
+  inner_join(get_sentiments("bing"))
+```
+
 

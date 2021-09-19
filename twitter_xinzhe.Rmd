@@ -79,17 +79,18 @@ sentiment_output <- sentiment_output %>%
 
 ## Plot
 ```{r}
+library(scales)
 sentiment_output$fraction = sentiment_output$count / sum(sentiment_output$count)
 sentiment_output$ymax = cumsum(sentiment_output$fraction)
 sentiment_output$ymin = c(0, head(sentiment_output$ymax, n=-1))
 
 ggplot(sentiment_output, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=sentiment)) +
   geom_rect() +
-  geom_text( x=1.8, aes(y=(ymax+ymin)/2, label=sentiment, color=sentiment), size=6) +
+  geom_text( x=5.3, aes(y=(ymax+ymin)/2, label=label_percent()(fraction), color=sentiment), size=6) +
   coord_polar(theta="y") +
-  xlim(c(-1, 4)) +
+  xlim(c(-1, 5)) +
   theme_void() +
-  theme(legend.position = "none")
+  theme(legend.position="bottom")
 ```
 
 
